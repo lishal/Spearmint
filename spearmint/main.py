@@ -209,6 +209,9 @@ def get_options():
     parser.add_option("--config", dest="config_file",
                       help="Configuration file name.",
                       type="string", default="config.json")
+    parser.add_option("--seed", dest="seed",
+                      help="Random seed",
+                      type="int", default=1000)
 
     (commandline_kwargs, args) = parser.parse_args()
 
@@ -224,6 +227,7 @@ def get_options():
     except:
         raise Exception("config.json did not load properly. Perhaps a spurious comma?")
     options["config"]  = commandline_kwargs.config_file
+    options["seed"] = int(commandline_kwargs.seed)
 
 
     # Set sensible defaults for options
@@ -247,7 +251,11 @@ def get_options():
 
 def main():
     options, expt_dir = get_options()
-
+    for t in options['tasks'].keys():
+        new_task = t + str(options['seed'])
+        task_vals = options['tasks'].pop(t)
+        options['tasks'][new_task] = task_vals
+    np.random.seed(options['seed'])
     resources = parse_resources_from_config(options)
 
     # Load up the chooser.
@@ -394,7 +402,8 @@ def get_suggestion(chooser, task_names, db, expt_dir, options, resource_name):
         'status'      : 'new',
         'submit time' : time.time(),
         'start time'  : None,
-        'end time'    : None
+        'end time'    : None,
+        'seed'        : options['seed']
     }
 
     save_job(job, db, experiment_name)
@@ -429,13 +438,13 @@ def save_job(job, db, experiment_name):
     """save a job to the database"""
     db.save(job, experiment_name, 'jobs', {'id' : job['id']})
 
-def load_task_group(db, options, task_names=None):
+def load_task_group(db, options, task_names=None,seed = None):
+
     if task_names is None:
         task_names = options['tasks'].keys()
     task_options = { task: options["tasks"][task] for task in task_names }
 
     jobs = load_jobs(db, options['experiment-name'])
-
     task_group = TaskGroup(task_options, options['variables'])
 
     if jobs:
@@ -455,40 +464,6 @@ def load_task_group(db, options, task_names=None):
 
     return task_group
 
-
-# BROKEN
-def print_diagnostics(chooser):
-    sys.stderr.write("Optimizing over %d dimensions\n" % (expt_grid.vmap.cardinality))
-    best_val   = None
-    best_job   = None
-    best_input = None
-    if task.has_data():
-        best_input, best_val = chooser.get_best()
-        best_job = db.load(experiment_name, 'jobs', {'input' : best_input})
-
-        if best_job:
-            best_job = best_job[0]
-        else:
-            best_job 
-            raise Warning('Job ID of best input/value pair not recorded.')
-
-    # Track the time series of optimization. This should eventually go into a diagnostics module.
-    trace_fh = open(os.path.join(expt_dir, 'trace.csv'), 'a')
-    trace_fh.write("%d,%f,%d,%d,%d,%d\n"
-                   % (time.time(), best_val, best_job,
-                      tasks.pending.shape[0], tasks.invalid.shape[0], tasks.data.shape[0]))
-    trace_fh.close()
-
-    # Print out the best job results
-    best_job_fh = open(os.path.join(expt_dir, 'best_job_and_result.txt'), 'w')
-    best_job_fh.write("Best result: %f\nJob-id: %d\nParameters: \n" % 
-                      (best_val, best_job))
-
-    if best_input:
-        for name, params in task.get_params(best_input):
-            best_job_fh.write('%s: %s\n' % (name, params))
-
-    best_job_fh.close()
 
 if __name__ == '__main__':
     main()

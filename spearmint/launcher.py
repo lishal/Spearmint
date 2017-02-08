@@ -263,7 +263,7 @@ def launch(db_address, experiment_name, job_id):
             else:
                 result = {'main' : result}
         
-        if set(result.keys()) != set(job['tasks']):
+        if not any([i in result.keys() for i in job['tasks']]):
             raise Exception("Result task names %s did not match job task names %s." % (result.keys(), job['tasks']))
 
         success = True
@@ -324,7 +324,7 @@ def python_launcher(job):
     sys.stderr.write('Importing %s.py\n' % main_file)
     module  = __import__(main_file)
     sys.stderr.write('Running %s.main()\n' % main_file)
-    result = module.main(job['id'], params)
+    result = module.main(job['seed'], params)
 
     # Change back out.
     os.chdir('..')
