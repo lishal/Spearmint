@@ -9,7 +9,7 @@
             "max-finished-jobs" : 100
         },
         "cluster" : {
-            "scheduler"         : "SLURM",
+            "scheduler"         : "SGE",
             "max-concurrent"    : 3,
             "max-finished-jobs" : 1000
         }
