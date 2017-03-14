@@ -228,6 +228,7 @@ def get_options():
         raise Exception("config.json did not load properly. Perhaps a spurious comma?")
     options["config"]  = commandline_kwargs.config_file
     options["seed"] = int(commandline_kwargs.seed)
+    options["grid_seed"] = options["seed"]
 
 
     # Set sensible defaults for options
