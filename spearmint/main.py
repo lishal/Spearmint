@@ -262,7 +262,7 @@ def main():
     # Load up the chooser.
     chooser_module = importlib.import_module('spearmint.choosers.' + options['chooser'])
     chooser = chooser_module.init(options)
-    experiment_name     = options.get("experiment-name", 'unnamed-experiment')
+    experiment_name     = options.get("experiment-name", 'unnamed-experiment') + str(options['seed'])
 
     # Connect to the database
     db_address = options['database']['address']
