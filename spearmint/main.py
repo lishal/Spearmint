@@ -228,6 +228,7 @@ def get_options():
         raise Exception("config.json did not load properly. Perhaps a spurious comma?")
     options["config"]  = commandline_kwargs.config_file
     options["seed"] = int(commandline_kwargs.seed)
+    options["grid_seed"] = options["seed"]
 
 
     # Set sensible defaults for options
@@ -261,7 +262,9 @@ def main():
     # Load up the chooser.
     chooser_module = importlib.import_module('spearmint.choosers.' + options['chooser'])
     chooser = chooser_module.init(options)
-    experiment_name     = options.get("experiment-name", 'unnamed-experiment')
+    experiment_name     = options.get("experiment-name", 'unnamed-experiment') + str(options['seed'])
+    options["experiment-name"] = experiment_name
+    print experiment_name
 
     # Connect to the database
     db_address = options['database']['address']
@@ -347,12 +350,13 @@ def get_suggestion(chooser, task_names, db, expt_dir, options, resource_name):
         raise Exception("Error: trying to obtain suggestion for 0 tasks ")
 
     experiment_name = options['experiment-name']
+    print experiment_name
 
     # We are only interested in the tasks in task_names
     task_options = { task: options["tasks"][task] for task in task_names }
     # For now we aren't doing any multi-task, so the below is simpler
     # task_options = options["tasks"]
-
+    print task_names
     # Load the tasks from the database -- only those in task_names!
     task_group = load_task_group(db, options, task_names)
 

@@ -189,6 +189,6 @@ def init(*args, **kwargs):
 
 class SGEScheduler(AbstractClusterScheduler):
     def submit_command(self, output_file, job_name):
-        return 'qsub -S /bin/bash -e %s -o %s -j -N %s' % (output_file, output_file, job_name)
+        return 'qsub -S /bin/bash -e %s -o %s -V -j y -N %s' % (output_file, output_file, job_name)
     def output_regexp(self):
         return r'Your job (\d+)'
