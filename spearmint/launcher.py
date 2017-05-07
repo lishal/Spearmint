@@ -324,7 +324,7 @@ def python_launcher(job):
     sys.stderr.write('Importing %s.py\n' % main_file)
     module  = __import__(main_file)
     sys.stderr.write('Running %s.main()\n' % main_file)
-    result = module.main(job['seed'], params)
+    result = module.main(job['tasks'][0], params)
 
     # Change back out.
     os.chdir('..')

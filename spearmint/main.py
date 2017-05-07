@@ -252,7 +252,7 @@ def get_options():
 def main():
     options, expt_dir = get_options()
     for t in options['tasks'].keys():
-        new_task = t + str(options['seed'])
+        new_task = t + "_"+str(options['seed'])
         task_vals = options['tasks'].pop(t)
         options['tasks'][new_task] = task_vals
     np.random.seed(options['seed'])
